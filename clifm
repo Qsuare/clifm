@@ -28,7 +28,7 @@ while getopts ":a:b:u:h" o; do
         u)
             wget -q --directory-prefix=/tmp/ www.last.fm/user/${OPTARG} && echo "Last played tracks by ${OPTARG}"
             echo "-------------------------------"
-            echo $(sed -n '/withimages/,/span class="moduleOptions"/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -cols $(tput cols) -T text/html | sed -r 's/\[[0-9]+\]//g'
+            echo $(sed -n '/withimages/,/span class="moduleOptions"/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -cols $(tput cols) -T text/html | sed -r 's/\[[0-9]+\]//g' | sed -r 's/\[[a-z]+\]//g' ## Find a less-derpy way to do it
             rm /tmp/${OPTARG}
             ;;
         h)  helpfunc
