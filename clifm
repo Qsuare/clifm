@@ -1,0 +1,39 @@
+#!/bin/bash
+# clifm; lastfm CLI client
+# Usage: [-a <ArtistName/AlbumName>] [-b <ArtistName>] [u <username>] [-h]
+
+helpfunc(){
+    echo "  -a <ArtistName/AlbumName>   Display information about an album"
+    echo "  -b <ArtistName>             Display information about an artist"
+    echo "  -u <Username>               Display last played tracks by a user"
+    echo "  -h                          Display this help Message"
+}
+while getopts ":a:b:u:h" o; do
+    case "${o}" in
+        b)
+            wget -q --directory-prefix=/tmp/ www.last.fm/music/${OPTARG} && echo "${OPTARG}
+----------------------------------" | sed 's/+/ /g'
+            echo $(sed -n '/wiki-text/,/wiki-options/p' /tmp/${OPTARG}) | sed 's/<[^>]\+>//g' | w3m -dump -T text/html
+            echo ""
+            ;;
+        a)
+            wget -q -O /tmp/album  www.last.fm/music/${OPTARG} && echo "About ${OPTARG}" | sed 's/+/ /g'
+            echo "-------------------------------"
+            echo $(sed -n '/wiki-text/,/wiki-options/p' /tmp/album) | sed 's/<[^>]\+>//g' | w3m -dump -T text/html
+            echo ""
+            echo "Tracklist"
+            echo "-------------------------------"
+            echo $(sed -n '/candyStriped/,/section/p' /tmp/album) | sed -r 's/<[^>]\+>/\n/g' | w3m -dump -T text/html
+            ;;
+        u)
+            wget -q --directory-prefix=/tmp/ www.last.fm/user/${OPTARG} && echo "Last played tracks by ${OPTARG}"
+            echo "-------------------------------"
+            echo $(sed -n '/withimages/,/span class="moduleOptions"/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -cols $(tput cols) -T text/html | sed -r 's/\[[0-9]+\]//g'
+            rm /tmp/${OPTARG}
+            ;;
+        h)  helpfunc
+            ;;
+        *)  helpfunc
+            ;;
+    esac
+done
