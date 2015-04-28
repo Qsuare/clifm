@@ -26,9 +26,13 @@ while getopts ":a:b:u:h" o; do
             echo $(sed -n '/candyStriped/,/section/p' /tmp/album) | sed -r 's/<[^>]\+>/\n/g' | w3m -dump -T text/html
             ;;
         u)
-            wget -q --directory-prefix=/tmp/ www.last.fm/user/${OPTARG} && echo "Last played tracks by ${OPTARG}"
+            wget -q --directory-prefix=/tmp/ www.last.fm/user/${OPTARG} && echo ${OPTARG}
             echo "-------------------------------"
-            echo $(sed -n '/withimages/,/span class="moduleOptions"/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -cols $(tput cols) -T text/html | sed -r 's/\[[0-9]+\]//g' | sed -r 's/\[[a-z]+\]//g' ## Find a less-derpy way to do it
+            echo $(sed -n '/class="userInfo adr/,/!--.userData/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -T text/html | sed -e '/^[[:space:]]*$/d' | sed "s/Last seen/\n&/g" | sed 's/●//g'
+            echo ""
+            echo "Last played tracks by ${OPTARG}"
+            echo "-------------------------------"
+            echo $(sed -n '/withimages/,/span class="moduleOptions"/p' /tmp/${OPTARG}) | sed -r 's/<[^>]\+>//g' | w3m -dump -cols $(tput cols) -T text/html | sed -r 's/\[[0-9]+\]//g' | sed -r 's/\[[a-z]+\]//g' | sed 's/^[ \t]*//' ## Find a less-derpy way to do it
             rm /tmp/${OPTARG}
             ;;
         h)  helpfunc
